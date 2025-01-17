@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model achats {
+  idAchat       Int      @id @default(autoincrement())
+  idProduit     Int
+  dateAchat     DateTime @default(dbgenerated("(curdate())")) @db.Date
+  quantiteAchat Int
+  statut        Boolean? @default(true)
+  produits      produits @relation(fields: [idProduit], references: [idProduit], onDelete: Cascade, map: "achats_ibfk_1")
+
+  @@index([idProduit], map: "idProduit")
+}
+
+model clients {
+  idClient    Int                @id @default(autoincrement())
+  nomClient   String             @db.VarChar(255)
+  phoneClient String             @db.VarChar(20)
+  emailClient String?            @unique(map: "emailClient") @db.VarChar(255)
+  typeClient  clients_typeClient
+  statut      Boolean?           @default(true)
+  factures    factures[]
+}
+
+model factures {
+  idFacture    Int       @id @default(autoincrement())
+  idClient     Int
+  dateFacture  DateTime  @default(dbgenerated("(curdate())")) @db.Date
+  heureFacture DateTime  @default(dbgenerated("(curtime())")) @db.Time(0)
+  statut       Boolean?  @default(true)
+  clients      clients   @relation(fields: [idClient], references: [idClient], onDelete: Cascade, map: "factures_ibfk_1")
+  sorties      sorties[]
+
+  @@index([idClient], map: "idClient")
+}
+
+model fournisseurs {
+  idFournisseur      Int               @id @default(autoincrement())
+  nomFournisseur     String            @db.VarChar(255)
+  phoneFournisseur   String            @db.VarChar(20)
+  adresseFournisseur String?           @db.Text
+  email              String?           @unique(map: "email") @db.VarChar(255)
+  type               fournisseurs_type
+  statut             Boolean?          @default(true)
+  produits           produits[]
+}
+
+model produits {
+  idProduit      Int           @id @default(autoincrement())
+  nomProduit     String        @db.VarChar(255)
+  prixProduit    Decimal       @db.Decimal(10, 2)
+  dateExpiration DateTime?     @db.Date
+  stock          Int?          @default(0)
+  id_fournisseur Int?
+  statut         Boolean?      @default(true)
+  achats         achats[]
+  fournisseurs   fournisseurs? @relation(fields: [id_fournisseur], references: [idFournisseur], map: "produits_ibfk_1")
+  sorties        sorties[]
+
+  @@index([id_fournisseur], map: "id_fournisseur")
+}
+
+model sorties {
+  idSortie     Int      @id @default(autoincrement())
+  idProduit    Int
+  quantite     Int
+  prixUnitaire Decimal  @db.Decimal(10, 2)
+  prixTotal    Decimal  @db.Decimal(10, 2)
+  idFacture    Int
+  statut       Boolean? @default(true)
+  produits     produits @relation(fields: [idProduit], references: [idProduit], onDelete: Cascade, map: "sorties_ibfk_1")
+  factures     factures @relation(fields: [idFacture], references: [idFacture], onDelete: Cascade, map: "sorties_ibfk_2")
+
+  @@index([idFacture], map: "idFacture")
+  @@index([idProduit], map: "idProduit")
+}
+
+enum clients_typeClient {
+  particulier
+  entreprise
+}
+
+enum fournisseurs_type {
+  local
+  international
+}
+
+
+model RefreshToken {
+  id           Int      @id @default(autoincrement()) // ID primaire du refresh token
+  idUtilisateur Int    // Référence à l'utilisateur
+  token        String
+  createdAt    DateTime @default(now()) // Date de création
+  updatedAt    DateTime @updatedAt      // Date de mise à jour
+
+  utilisateurs  Utilisateurs @relation(fields: [idUtilisateur], references: [idUtilisateur]) // Relation avec Utilisateur
+}
+
+model Utilisateurs {
+  idUtilisateur Int      @id @default(autoincrement())
+  nomUtilisateur String
+  username       String  @unique // assurez-vous que le champ 'username' est unique
+  password       String
+  statut         Boolean?
+  refreshTokens  RefreshToken[] // Relation inverse avec RefreshToken
+}
+
