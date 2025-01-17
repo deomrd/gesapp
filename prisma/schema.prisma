@@ -47,7 +47,7 @@ model fournisseurs {
   adresseFournisseur String?           @db.Text
   email              String?           @unique(map: "email") @db.VarChar(255)
   type               fournisseurs_type
-  statut             Boolean?          @default(true)
+  statut             Int?          @default(1)
   produits           produits[]
 }
 
@@ -58,7 +58,7 @@ model produits {
   dateExpiration DateTime?     @db.Date
   stock          Int?          @default(0)
   id_fournisseur Int?
-  statut         Boolean?      @default(true)
+  statut         Int?      @default(1)
   achats         achats[]
   fournisseurs   fournisseurs? @relation(fields: [id_fournisseur], references: [idFournisseur], map: "produits_ibfk_1")
   sorties        sorties[]

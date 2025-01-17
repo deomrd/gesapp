@@ -13,6 +13,14 @@ const ajouterFournisseur = async (req: Request, res: Response, next: NextFunctio
     return;
   }
 
+  const existFournisseur = await prisma.fournisseurs.findFirst({
+    where: { email },
+  });
+  if(existFournisseur){
+    res.status(400).json({ error: 'Cette adresse mail est déjà associée à un fournisseur' });
+    return;
+  }
+
   try {
     // Insertion du fournisseur dans la base de données
     const fournisseur = await prisma.fournisseurs.create({

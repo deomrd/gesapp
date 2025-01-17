@@ -4,6 +4,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import ajouterFournisseur from './../middleware/ajouterFournisseur';
+import { listerFournisseurs } from './../middleware/listerFournisseurs';
+import ajouterProduit from './../middleware/ajouterProduit';
+import listerProduits from './../middleware/listerProduits';
+import afficherUnProduit from './../middleware/afficherUnProduit';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -110,13 +114,38 @@ app.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-app.post('/fournisseurs', ajouterFournisseur, async (req: Request, res: Response): Promise<void> => {
+// ajouter fournisseur
+app.post('/fournisseur', ajouterFournisseur, async (req: Request, res: Response): Promise<void> => {
   const { fournisseur } = req.body; 
   res.status(201).json({
     message: 'Fournisseur ajouté avec succès',
     fournisseur,
   });
 });
+
+// lister les fournisseurs
+app.get('/fournisseurs', listerFournisseurs);
+// ajouter produit
+app.post('/produit', ajouterProduit, async (req: Request, res: Response) => {
+  try {
+    const produit = req.body.produit;
+    
+    res.status(201).json({
+      message: 'Produit ajouté avec succès.',
+      produit,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur lors de l'ajout du produit." });
+  }
+});
+// liste des produits et fournisseurs associes
+app.get('/produits', listerProduits);
+
+// afficher un seul produit
+app.get('/produits/:idProduit', afficherUnProduit);
+
+
 
 
 
