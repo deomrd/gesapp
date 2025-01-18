@@ -12,7 +12,7 @@ model achats {
   idProduit     Int
   dateAchat     DateTime @default(dbgenerated("(curdate())")) @db.Date
   quantiteAchat Int
-  statut        Boolean? @default(true)
+  statut        Int? @default(1)
   produits      produits @relation(fields: [idProduit], references: [idProduit], onDelete: Cascade, map: "achats_ibfk_1")
 
   @@index([idProduit], map: "idProduit")
